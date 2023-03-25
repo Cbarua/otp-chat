@@ -1,0 +1,19 @@
+2023-03-23
+----------
+#1
+"min-width: fit-content" overrides "max-width: 30rem;".
+"min-width: 240px" = input.width + .box-container.padding
+
+#2
+gradient background wasn't flowing the whole page when
+viewport height exceeds the body.height.
+body.height to "100vh" or "fit-content" doesn't work.
+"min-height: 100vh;" does the trick. body.height is default to 100%.
+
+#3
+min-width, width, max-width can be defined in a single clamp() function.
+
+2023-03-26
+----------
+#4
+'otp.php?refNo' sets $referenceNo = ''; so isset() cannot be used.
