@@ -2,6 +2,7 @@
 
 # Necessary libraries
 $root = __DIR__;
+require_once $root. '/config.php';
 require_once $root. '/logger.php';
 require_once $root. '/request.php';
 
@@ -27,13 +28,15 @@ if (isset($_POST['otp'])) {
 		$error = $msg['error'];
 	} else {
 		$otp = $otp[0];
-		$response = verifyOtp($url, $referenceNo, $otp);
+		$response = verifyOtp(url[$platform], $referenceNo, $otp);
 		
 		otplog($response);
 
 		# I need to add code for invalid otp
 		if ($response['status'] === 'success') {	
 			header('Location: thanks.php');	
+		} else if ($response['status'] === 'Invalid OTP') {
+			$error = $msg['invalid'];
 		} else {
 			$error = $msg['try_again'];
 		}
@@ -44,7 +47,7 @@ require 'header.php';
 
 ?>
 <section class="form-section">
-	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?refNo=' . $referenceNo);?>" method="post">
+	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?refNo=' . $referenceNo . "&platform=$platform");?>" method="post">
 		<span class="form-title">දුරකතන අංකය තහවුරු කිරීම</span>
 		<span class="form-text">ඔබගේ දුරකතන අංකය වෙත ලැබුනු PIN අංකය ඇතුළත් කරන්න</span>
 		<?php if (isset($error)) echo $error; ?>
