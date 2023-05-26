@@ -1,21 +1,16 @@
 <?php
 
-class Request
+function sendRequest($jsonStream, $url)
 {
-
-    public static function sendRequest($jsonStream, $url)
-    {
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStream);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $res = curl_exec($ch);
-        curl_close($ch);
-        return $res;
-    }
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStream);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $res = curl_exec($ch);
+    curl_close($ch);
+    return $res;
 }
 
 function getOtp($url, $subscriberId, $metaData) {
@@ -26,7 +21,7 @@ function getOtp($url, $subscriberId, $metaData) {
     );
 
     $jsonObjectFields = json_encode($arrayField);
-    $res = Request::sendRequest($jsonObjectFields, $url);
+    $res = sendRequest($jsonObjectFields, $url);
     $response = json_decode($res, true);
     return $response;
 }
@@ -39,7 +34,7 @@ function verifyOtp($url, $referenceNo, $otp) {
     );
 
     $jsonObjectFields = json_encode($arrayField);
-    $res = Request::sendRequest($jsonObjectFields, $url);
+    $res = sendRequest($jsonObjectFields, $url);
     $response = json_decode($res, true);
     return $response;
 }
