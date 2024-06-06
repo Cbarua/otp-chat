@@ -64,7 +64,7 @@ require 'header.php';
 		<?php if (isset($message)) echo $message; ?>
 		<input type="tel" name="mobile" placeholder="0700000000" maxlength="10" minlength="10" required>
 		<input type="submit" value="Register">
-		<span id="charging">Dialog, Hutch, Airtel, Mobitel Daily Rs 5+tax</span>
+		<span id="charging">Dialog, Hutch, Airtel, Mobitel Daily Rs <?php echo $_ENV['CHARGE'] ?>+tax</span>
 	</form>
 </section>
 </div>
