@@ -12,6 +12,6 @@
     <div class="box-container">
         <section class="img-section">
             <div class="img-container">
-                <img src="assets/images/Girl in a salwar.jpeg" alt="A simple girl">
+                <img src="assets/images/user.png" alt="user avatar">
             </div>
         </section>

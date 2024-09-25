@@ -59,12 +59,11 @@ require 'header.php';
 ?>
 <section class="form-section">
 	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
-		<span class="form-title">කැමැති කෙල්ලෙක් හෝ කොල්ලෙක් සොයාගන්න</span>
-		<span class="form-text">ඔබගේ දුරකතන අංකය ඇතුළත් කරන්න</span>
+		<span class="form-text">ඔබගේ දුරකතන අංකය පහතින් ඇතුළත් කරන්න</span>
 		<?php if (isset($message)) echo $message; ?>
 		<input type="tel" name="mobile" placeholder="0700000000" maxlength="10" minlength="10" required>
 		<input type="submit" value="Register">
-		<span id="charging">Dialog, Hutch, Airtel, Mobitel Daily Rs <?php echo $_ENV['CHARGE'] ?>+tax</span>
+		<span id="charging">Dialog, Hutch, Airtel Daily Rs <?php echo $_ENV['CHARGE'] ?>+tax</span>
 	</form>
 </section>
 </div>
