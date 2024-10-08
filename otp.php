@@ -48,12 +48,12 @@ require 'header.php';
 ?>
 <section class="form-section">
 	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?refNo=' . $referenceNo . "&platform=$platform");?>" method="post">
-		<span class="form-title">දුරකතන අංකය තහවුරු කිරීම</span>
-		<span class="form-text">ඔබගේ දුරකතන අංකය වෙත ලැබුනු PIN අංකය ඇතුළත් කරන්න</span>
+		<span class="form-title"><?php echo $msg_bd['otp-form-title'] ?></span>
+		<span class="form-text"><?php echo $msg_bd['otp-form-text'] ?></span>
 		<?php if (isset($error)) echo $error; ?>
 		<input type="number" name="otp" placeholder="123456" required>
 		<input type="submit" value="Verify">
-		<span>නැවත PIN අංකය ඉල්ලීමට <a href="index.php">මෙතන ඔබන්න.</a></span>
+		<span><?php echo $msg_bd['otp-pin-again'] ?></span>
 	</form>
 </section>
 </div>

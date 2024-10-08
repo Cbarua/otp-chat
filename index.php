@@ -10,24 +10,25 @@ otplog('New log');
 
 $msg = [
 	'error' => '<div class="alert alert-danger">Enter valid mobile number</div>',
+	'operator_error' => '<div class="alert alert-danger">Operator not supported. Robi & Airtel customers only.</div>',
 	'registered' => '<div class="alert alert-success">You are already registered!</div>'
 ];
 
 if (isset($_POST['mobile'])) {
-	$regex_mobile = '/^07\d{8}$/m';
+	$regex_mobile = '/^01\d{9}$/m';
 	preg_match($regex_mobile, $_POST['mobile'], $mobile);
+	$mobile = 'tel:88'. $mobile[0];
+	otplog($mobile);
 	
 	if (empty($mobile)) {
 		$message = $msg['error'];
-	} else {
-		$platform = 'ideamart';
-		$mobile = 'tel:94'. substr($mobile[0], 1);
-		otplog($mobile);
-		
-		if (in_array($mobile[7], ['0', '1'])) {
-			$platform = 'mspace';
-		}
-
+	}
+	// 016 and 018 - Robi (016 is mainly used for Airtel)
+	elseif (!(in_array($mobile[8], ['6', '8']))) {
+		$message = $msg['operator_error'];
+	}
+	else {
+		$platform = 'bdapps';
 		$url = url[$platform];
 
 		# I'm gonna add this later
@@ -59,12 +60,12 @@ require 'header.php';
 ?>
 <section class="form-section">
 	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
-		<span class="form-title">කැමැති කෙල්ලෙක් හෝ කොල්ලෙක් සොයාගන්න</span>
-		<span class="form-text">ඔබගේ දුරකතන අංකය ඇතුළත් කරන්න</span>
+		<span class="form-title"><?php echo $msg_bd['index-form-title'] ?></span>
+		<span class="form-text"><?php echo $msg_bd['index-form-text'] ?></span>
 		<?php if (isset($message)) echo $message; ?>
-		<input type="tel" name="mobile" placeholder="0700000000" maxlength="10" minlength="10" required>
+		<input type="tel" name="mobile" placeholder="01000000000" maxlength="11" minlength="11" required>
 		<input type="submit" value="Register">
-		<span id="charging">Dialog, Hutch, Airtel, Mobitel Daily Rs <?php echo $_ENV['CHARGE'] ?>+tax</span>
+		<span id="charging"><?php echo $msg_bd['index-charging'] ?></span>
 	</form>
 </section>
 </div>
