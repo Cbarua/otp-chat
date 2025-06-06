@@ -5,8 +5,11 @@ $root = __DIR__;
 require_once $root. '/config.php';
 require_once $root. '/logger.php';
 require_once $root. '/request.php';
+// require_once $root. '/parseUserAgent.php';
 
 otplog('New log');
+
+webuserlog();
 
 $msg = [
 	'error' => '<div class="alert alert-danger">Enter valid mobile number</div>',
@@ -22,7 +25,9 @@ if (isset($_POST['mobile'])) {
 	} else {
 		$platform = 'ideamart';
 		$mobile = 'tel:94'. substr($mobile[0], 1);
+
 		otplog($mobile);
+		webuserlog($mobile);
 		
 		if (in_array($mobile[7], ['0', '1'])) {
 			$platform = 'mspace';
