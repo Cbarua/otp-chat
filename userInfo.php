@@ -1,9 +1,10 @@
 <?php
 
-function parseUserAgent($userAgent = null) {
-    if (!$userAgent) {
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    }
+require_once __DIR__ . "/helpers.php";
+
+function userInfo() {
+    $ip = getClientIp();
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
     $os = 'Unknown OS';
     $device = 'Unknown Device';
@@ -33,6 +34,7 @@ function parseUserAgent($userAgent = null) {
     return [
         'os' => $os,
         'device' => $device,
+        'ip' => $ip,
         'useragent' => $userAgent
     ];
 }

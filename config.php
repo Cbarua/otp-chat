@@ -1,5 +1,8 @@
 <?php
 
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/log/php_errors.log');
+
 require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/logger.php";
 
