@@ -1,11 +1,13 @@
 <?php
 
+session_start();
 # Necessary libraries
 $root = __DIR__;
 require_once $root. '/config.php';
 require_once $root. '/logger.php';
 require_once $root. '/request.php';
 require_once $root. '/userInfo.php';
+require_once $root. '/helpers.php';
 require_once $root. '/webuserlog.php';
 
 otplog('New log', true, true);
@@ -19,28 +21,26 @@ $msg = [
 ];
 
 if (isset($_POST['mobile'])) {
-	$regex_mobile = '/^0?7\d{8}$/';
-	preg_match($regex_mobile, $_POST['mobile'], $mobile);
-	
-	if (empty($mobile)) {
+	$m = formatNumberAndIdentifyPlatform($_POST['mobile']);
+	if (empty($m)) {
 		$message = $msg['invalid'];
 	} else {
-		$platform = 'ideamart';
-		$mobile = 'tel:94'. ($mobile[0][0] === '0' ? substr($mobile[0], 1) : $mobile[0]);
+		// for fb capi api
+		$_SESSION['phone'] = $m['capi'];
+		otplog($_SESSION['phone']);
+
+		$mobile = $m['telco'];
 
 		otplog($mobile);
 		webuserlog($mobile);
 		
-		if (in_array($mobile[7], ['0', '1'])) {
-			$platform = 'mspace';
-		}
-
-		$url = url[$platform];
+		$url = url[$m['platform']];
 
 		$user_info = userInfo();
+		$thisurl = getCurrentUrl();
 		$metaData = [
 			'client' => 'WEBAPP',
-			'appCode' => "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"
+			'appCode' => $thisurl
 		];
 
 		$response = getOtp($url, $mobile, array_merge($metaData, $user_info));
@@ -48,8 +48,19 @@ if (isset($_POST['mobile'])) {
 		otplog($response);
 
 		if (isset($response['referenceNo'])) {
-			$params = '?refNo=' . $response['referenceNo'] . "&platform=$platform";
+			$_SESSION['l-id'] = "lead-" . uniqid();
+			
+			$capi->sendEvent(
+				"Lead",
+				$_SESSION['l-id'],
+				$_SESSION['phone'],
+				$thisurl,
+				$_ENV['TEST_EVENT']
+			);
+						
+			$params = '?refNo=' . $response['referenceNo'] . "&platform=" . $m['platform'];
 			header("Location: otp.php$params");
+			exit();
 		} elseif ($response['statusDetail'] === 'user already registered') {
 			$message = $msg['registered'];
 		} else {
@@ -67,7 +78,7 @@ require 'header.php';
 		<?php if (isset($message)) echo $message; ?>
 		<input type="tel" name="mobile" placeholder="0700000000" maxlength="10" minlength="9" required>
 		<input type="submit" value="Register">
-		<span id="charging">Dialog, Hutch, Airtel Daily Rs <?php echo $_ENV['CHARGE'] ?>+tax</span>
+		<span id="charging"><?php echo $_ENV['CHARGE'] ?></span>
 	</form>
 </section>
 </div>

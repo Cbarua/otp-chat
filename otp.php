@@ -1,10 +1,12 @@
 <?php
 
+session_start();
 # Necessary libraries
 $root = __DIR__;
 require_once $root. '/config.php';
 require_once $root. '/logger.php';
 require_once $root. '/request.php';
+require_once $root. '/helpers.php';
 
 $msg = [
 	'error' => '<div class="alert alert-danger">Enter valid pin number</div>',
@@ -16,8 +18,9 @@ $referenceNo = $_GET['refNo'];
 $platform = $_GET['platform'];
 
 #4
-if (empty($referenceNo) && empty($platform)) {
+if (empty($referenceNo) || empty($platform)) {
 	header('Location: index.php');
+	exit;
 }
 
 if (isset($_POST['otp'])) {
@@ -32,9 +35,20 @@ if (isset($_POST['otp'])) {
 		
 		otplog($response);
 
-		# I need to add code for invalid otp
 		if ($response['status'] === 'success') {	
-			header('Location: thanks.php');	
+			$_SESSION['reg-id'] = "reg-" . uniqid();
+			$thisurl = getCurrentUrl();
+
+			$capi->sendEvent(
+				"CompleteRegistration",
+				$_SESSION['reg-id'],
+				$_SESSION['phone'],  // store phone from first step
+				$thisurl,
+				$_ENV['TEST_EVENT']
+			);
+			
+			header('Location: thanks.php');
+			exit();
 		} else if ($response['status'] === 'Invalid OTP') {
 			$error = $msg['invalid'];
 		} else {
@@ -45,6 +59,12 @@ if (isset($_POST['otp'])) {
 
 require 'header.php';
 
+// fb pixel code is in header
+if (isset($_SESSION['l-id'])) {
+    // User entered phone number and server event sent, now sending pixel event
+	echo "<script>fbq('track', 'Lead', {}, { eventID: `{$_SESSION['l-id']}` });</script>";
+	unset($_SESSION['l-id']);
+}
 ?>
 <section class="form-section">
 	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?refNo=' . $referenceNo . "&platform=$platform");?>" method="post">

@@ -2,3 +2,8 @@ error_log
 log/
 vendor/
 .env
+assets/images/*.[jJ][pP][eE][gG]
+assets/images/*.[pP][nN][gG]
+*phpunit*
+tests/
+test/
