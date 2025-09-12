@@ -73,14 +73,39 @@ require 'header.php';
 
 ?>
 <section class="form-section">
-	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
+	<form id="leadForm" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
 		<span class="form-text">ඔබගේ දුරකතන අංකය පහතින් ඇතුළත් කරන්න</span>
 		<?php if (isset($message)) echo $message; ?>
-		<input type="tel" name="mobile" placeholder="0700000000" maxlength="10" minlength="9" required>
+		<!-- Error alert (hidden by default) -->
+		<div id="phoneError" class="alert alert-danger" style="display:none;">
+			වලංගු ජංගම දුරකථන අංකය ඇතුළත් කරන්න. උදා : 0772221234
+		</div>
+		<input type="tel" id="mobile" name="mobile" placeholder="0700000000" maxlength="10" minlength="9" required>
 		<input type="submit" value="Register">
 		<span id="charging"><?php echo $_ENV['CHARGE'] ?></span>
 	</form>
 </section>
 </div>
 </body>
+<script>
+	document.getElementById("leadForm").addEventListener("submit", function(e) {
+		const phoneInput = document.getElementById('mobile');
+		const errorDiv = document.getElementById('phoneError');
+		const phone = phoneInput.value.trim();
+
+		// Only accept 07XXXXXXXX (Sri Lankan mobile numbers)
+		const regex = /^07\d{8}$/;
+
+		if (!regex.test(phone)) {
+			e.preventDefault(); // stop submission
+			errorDiv.style.display = "block";
+			phoneInput.focus();
+			return false;
+		}
+
+		// If valid → hide error, allow submit
+		errorDiv.style.display = "none";
+		return true;
+	});
+</script>
 </html>

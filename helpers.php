@@ -1,7 +1,7 @@
 <?php
 
 function getClientIp() {
-    $ip = $_SERVER['REMOTE_ADDR'];
+    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         // Extract first IP in the list
@@ -54,8 +54,8 @@ function formatNumberAndIdentifyPlatform(string $rawPhone, string $countryCode =
 function getCurrentUrl(): string
 {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $uri = $_SERVER['REQUEST_URI'] ?? '/';
     return $protocol . $host . $uri;
 }
 
