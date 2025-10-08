@@ -1,15 +1,24 @@
 <?php
 
-function getClientIp() {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+function getClientIp(): string {
+    $ipHeaders = [
+        'HTTP_CLIENT_IP',
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_X_FORWARDED',
+        'HTTP_FORWARDED_FOR',
+        'HTTP_FORWARDED',
+        'REMOTE_ADDR'
+    ];
 
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        // Extract first IP in the list
-        $forwardedIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $ip = trim($forwardedIps[0]);
+    foreach ($ipHeaders as $header) {
+        $ip = $_SERVER[$header];
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
+        }
     }
 
-    return $ip;
+    return '0.0.0.0';
 }
 
 function formatNumberAndIdentifyPlatform(string $rawPhone, string $countryCode = 'LK'): array

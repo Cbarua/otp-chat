@@ -49,6 +49,9 @@ if (isset($_POST['mobile'])) {
 
 		if (isset($response['referenceNo'])) {
 			$_SESSION['l-id'] = "lead-" . uniqid();
+			// Store fbp and fbc from form post into session for later CAPI calls
+			$_SESSION['fbp'] = $_POST['fbp'] ?? null;
+			$_SESSION['fbc'] = $_POST['fbc'] ?? null;
 			
 			$capi->sendEvent(
 				"Lead",
@@ -80,6 +83,8 @@ require 'header.php';
 		<div id="phoneError" class="alert alert-danger" style="display:none;">
 			වලංගු ජංගම දුරකථන අංකය ඇතුළත් කරන්න. උදා : 0772221234
 		</div>
+		<input type="hidden" id="fbp" name="fbp" value="">
+		<input type="hidden" id="fbc" name="fbc" value="">
 		<input type="tel" id="mobile" name="mobile" placeholder="0700000000" maxlength="10" minlength="9" required>
 		<input type="submit" value="Register">
 		<span id="charging"><?php echo $_ENV['CHARGE'] ?></span>
@@ -102,6 +107,18 @@ require 'header.php';
 			phoneInput.focus();
 			return false;
 		}
+
+		// Helper to read a cookie value by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return '';
+        }
+
+        // Populate hidden fields with cookie values before submitting
+        document.getElementById('fbp').value = getCookie('_fbp');
+        document.getElementById('fbc').value = getCookie('_fbc');
 
 		// If valid → hide error, allow submit
 		errorDiv.style.display = "none";

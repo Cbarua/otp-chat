@@ -105,20 +105,24 @@ class CapiService
         }
 
         // Add client IP and user agent for improved matching
-        if (!empty($_SERVER['REMOTE_ADDR'])) {
-            $userData->setClientIpAddress($_SERVER['REMOTE_ADDR']);
+        $clientIp = $this->getClientIp();
+        if ($clientIp) {
+            $userData->setClientIpAddress($clientIp);
         }
         if (!empty($_SERVER['HTTP_USER_AGENT'])) {
             $userData->setClientUserAgent($_SERVER['HTTP_USER_AGENT']);
         }
 
         // Include fbp and fbc cookies if present (best practice to tie pixel & server events)
-        if (!empty($_COOKIE['_fbp'])) {
-            // _fbp is expected as string, include as-is
-            $userData->setFbp($_COOKIE['_fbp']);
+        // Prioritize fbp from session (from post), fallback to cookie
+        $fbp = $_SESSION['fbp'] ?? $_COOKIE['_fbp'] ?? null;
+        if (!empty($fbp)) {
+            $userData->setFbp($fbp);
         }
-        $fbc = $this->getFbc();
-        if ($fbc !== null) {
+
+        // Prioritize fbc from session, fallback to getFbc() which checks cookies and URL params
+        $fbc = $_SESSION['fbc'] ?? $this->getFbc();
+        if (!empty($fbc)) {
             $userData->setFbc($fbc);
         }
 
@@ -135,8 +139,8 @@ class CapiService
      * @param string $eventId   Unique event id for deduplication (must be the same as browser eventID)
      * @param string $phoneNormalized normalized phone (digits-only, country code included)
      * @param string $eventSourceUrl page URL where event happened (optional)
-     * @param array|null $customData optional custom data array (value, currency, etc.)
      * @param string|null $testEventCode optional test_event_code for Test Events tool
+     * @param array|null $customData optional custom data array (value, currency, etc.)
      * @return array decoded response from Facebook or throws exception on failure
      * @throws Exception
      */
@@ -165,8 +169,20 @@ class CapiService
         $event->setEventId($eventId); // IMPORTANT for deduplication
 
         // attach custom data if provided
-        if ($customData !== null) {
-            $event->setCustomData($customData);
+        if ($customData !== null && is_array($customData)) {
+            // Create a CustomData object, which is required by the SDK
+            $customDataObject = new CustomData();
+
+            // Set value and currency from the passed-in array
+            if (isset($customData['value'])) {
+                $customDataObject->setValue(floatval($customData['value']));
+            }
+            if (isset($customData['currency'])) {
+                $customDataObject->setCurrency($customData['currency']);
+            }
+
+            // Pass the prepared object to the event
+            $event->setCustomData($customDataObject);
         }
 
         // Build the event request
@@ -206,5 +222,15 @@ class CapiService
         $host = $_SERVER['HTTP_HOST'] ?? '';
         $uri = $_SERVER['REQUEST_URI'] ?? '';
         return $protocol . $host . $uri;
+    }
+
+    /**
+     * Utility: Get client IP for client_ip_address.
+     * @return string
+     */
+    private function getClientIp(): string
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+        return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '';
     }
 }

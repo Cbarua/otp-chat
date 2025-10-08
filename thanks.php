@@ -9,14 +9,27 @@ if (!isset($_SESSION['reg-id'])) {
 $root = __DIR__;
 require_once $root. '/config.php';
 require_once $root. '/logger.php';
+require_once $root. '/helpers.php';
 
 require 'header.php'; 
 
+// Add Manual Advanced Matching by re-initializing the pixel with the user's phone number hash
+if (!empty($_SESSION['phone'])) {
+  $phone = $_SESSION['phone'];
+  echo "<script>fbq('init', {$_ENV['PIXEL_ID']}, { ph: '{$phone}' });</script>";
+}
+
+// Fire the Pixel event for verified users only
+echo "<script>" . fbq_track(
+  'CompleteRegistration', 
+  $_SESSION['reg-id'], 
+  $testEventCode, 
+  [
+    'currency' => 'USD', 
+    'value' => 0.01, // Use float instead of string
+  ]
+) . "</script>";
 ?>
-<!-- Fire the Pixel event for verified users only -->
-<script>
-  fbq('track', 'CompleteRegistration', {}, { eventID: '<?php echo $_SESSION['reg-id'] ?>' });
-</script>
 
 <?php
 // Optional: unset the session flag so page refresh won't resend event

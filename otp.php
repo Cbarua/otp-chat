@@ -44,7 +44,8 @@ if (isset($_POST['otp'])) {
 				$_SESSION['reg-id'],
 				$_SESSION['phone'],  // store phone from first step
 				$thisurl,
-				$_ENV['TEST_EVENT']
+				$_ENV['TEST_EVENT'],
+				['currency' => 'USD', 'value' => 0.01]
 			);
 			
 			header('Location: thanks.php');
@@ -61,8 +62,13 @@ require 'header.php';
 
 // fb pixel code is in header
 if (isset($_SESSION['l-id'])) {
+    // Add Manual Advanced Matching by re-initializing the pixel with the user's phone number hash
+	$phone = $_SESSION['phone'];
+    if (!empty($phone)) {
+        echo "<script>fbq('init', {$_ENV['PIXEL_ID']}, { ph: '{$phone}' });</script>";
+    }
     // User entered phone number and server event sent, now sending pixel event
-	echo "<script>fbq('track', 'Lead', {}, { eventID: `{$_SESSION['l-id']}` });</script>";
+	echo "<script>fbq('track', 'Lead', { ph: '{$phone}'}, { eventID: `{$_SESSION['l-id']}` });</script>";
 	unset($_SESSION['l-id']);
 }
 ?>
