@@ -10,7 +10,7 @@ require_once $root. '/helpers.php';
 
 $msg = [
 	'error' => '<div class="alert alert-danger">Enter valid pin number</div>',
-	'invalid' => '<div class="alert alert-danger">Invalid OTP</div>',
+	'invalid' => '<div class="alert alert-danger">Invalid OTP. Please enter valid pin number.</div>',
 	'try_again' => '<div class="alert alert-danger">Please try again later</div>'
 ];
 
@@ -18,8 +18,13 @@ $referenceNo = $_GET['refNo'];
 $platform = $_GET['platform'];
 
 #4
-if (empty($referenceNo) || empty($platform)) {
+if ((empty($referenceNo) || empty($platform)) || empty($_SESSION['l-id'])) {
 	header('Location: index.php');
+	exit;
+}
+
+if (!empty($_SESSION['reg-id'])) {
+	header('Location: thanks.php');
 	exit;
 }
 
@@ -27,7 +32,7 @@ if (isset($_POST['otp'])) {
 	$regex_otp = '/^\d{6}$/m';
 	preg_match($regex_otp, $_POST['otp'], $otp);
 
-	if (empty($otp)) {
+	if (empty($otp) || $otp[0] === '123456') {
 		$error = $msg['error'];
 	} else {
 		$otp = $otp[0];
@@ -35,18 +40,44 @@ if (isset($_POST['otp'])) {
 		
 		otplog($response);
 
-		if ($response['status'] === 'success') {	
-			$_SESSION['reg-id'] = "reg-" . uniqid();
-			$thisurl = getCurrentUrl();
+		if ($response['status'] === 'success') {
+			// $subStatuses = ['INITIAL CHARGING PENDING', 'REGISTERED'];
 
-			$capi->sendEvent(
-				"CompleteRegistration",
-				$_SESSION['reg-id'],
-				$_SESSION['phone'],  // store phone from first step
-				$thisurl,
-				$_ENV['TEST_EVENT'],
-				['currency' => 'USD', 'value' => 0.01]
-			);
+			// mspace app isn't updated yet
+			$isSubscribed = $response['subscriptionStatus'] === 'INITIAL CHARGING PENDING' || $platform === 'mspace';
+			if ($isSubscribed) {
+				$value = 0.02;
+				$phone = $_SESSION['phone'];
+				
+				$regex_hutch = '/^tel:947[2,8]\d{7}/';
+				$regex_mobitel = '/^tel:947[0,1]\d{7}/';
+				$is_hutch = preg_match($regex_hutch, $phone);
+				$is_mobitel = preg_match($regex_hutch, $phone);
+
+				if ($is_hutch) {
+					$value = 0.015;
+					otplog('Hutch: ' . $is_hutch . ' value: ' . $value);
+				} elseif ($is_mobitel) {
+					$value = 0.01;
+					otplog('Mobitel: ' . $is_mobitel . ' value: ' . $value);
+				} else {
+					otplog('Dialog/Airtel: ' . 1 . ' value: ' . $value);
+				}
+
+				$_SESSION['value'] = $value;
+
+				$_SESSION['reg-id'] = "reg-" . uniqid();
+				$thisurl = getCurrentUrl();
+	
+				$capi->sendEvent(
+					"CompleteRegistration",
+					$_SESSION['reg-id'],
+					$_SESSION['phone'],  // store phone from first step
+					$thisurl,
+					$_ENV['TEST_EVENT'],
+					['currency' => 'USD', 'value' => $value]
+				);
+			}
 			
 			header('Location: thanks.php');
 			exit();
@@ -77,7 +108,7 @@ if (isset($_SESSION['l-id'])) {
 		<span class="form-title">දුරකතන අංකය තහවුරු කිරීම</span>
 		<span class="form-text">ඔබගේ දුරකතන අංකය වෙත ලැබුනු PIN අංකය ඇතුළත් කරන්න</span>
 		<?php if (isset($error)) echo $error; ?>
-		<input type="number" name="otp" placeholder="123456" required>
+		<input type="number" placeholder="Enter the pin" name="otp" required>
 		<input type="submit" value="Verify">
 		<span>නැවත PIN අංකය ඉල්ලීමට <a href="index.php">මෙතන ඔබන්න.</a></span>
 	</form>

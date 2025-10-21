@@ -2,10 +2,11 @@
 
 session_start();
 if (!isset($_SESSION['reg-id'])) {
-    // User did not complete OTP, redirect away or show error
-    header('Location: index.php');
-    exit;
+  // User did not complete OTP, redirect away or show error
+  header('Location: index.php');
+  exit;
 }
+
 $root = __DIR__;
 require_once $root. '/config.php';
 require_once $root. '/logger.php';
@@ -26,7 +27,7 @@ echo "<script>" . fbq_track(
   $testEventCode, 
   [
     'currency' => 'USD', 
-    'value' => 0.01, // Use float instead of string
+    'value' => $_SESSION['value'] ?? 0.01, // Use float instead of string
   ]
 ) . "</script>";
 ?>
