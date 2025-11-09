@@ -18,6 +18,18 @@ $otp_urls = [
 # Case insesitive constants are deprecated notice
 define("url", $otp_urls);
 
-$capi = new CapiService($_ENV['PIXEL_ID'], $_ENV['FBCAPI_TOKEN']);
+// --- CAPI Service Conditional Initialization (New Logic) ---
+$pixelId = $_ENV['PIXEL_ID'] ?? null;
+$capiToken = $_ENV['FBCAPI_TOKEN'] ?? null;
+
+// Check if BOTH are available before instantiating the service
+if ($pixelId && $capiToken) {
+    $capi = new CapiService($pixelId, $capiToken);
+} else {
+    // If config is missing, set $capi to null.
+    // This stops initialization errors and lets calling code check for null.
+    $capi = null;
+    error_log("CAPI initialization skipped: PIXEL_ID or FBCAPI_TOKEN is missing.");
+}
 
 ?>

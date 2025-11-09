@@ -56,14 +56,18 @@ if (isset($_POST['mobile'])) {
 				$_SESSION['fbp'] = $_POST['fbp'] ?? null;
 				$_SESSION['fbc'] = $_POST['fbc'] ?? null;
 				
-				$capi->sendEvent(
-					"Lead",
-					$_SESSION['l-id'],
-					$_SESSION['phone'],
-					$thisurl,
-					$_ENV['TEST_EVENT']
-				);
-							
+
+				// Send CAPI Lead event if CapiService is initialized
+				if ($capi !== null) {
+					$capi->sendEvent(
+						"Lead",
+						$_SESSION['l-id'],
+						$_SESSION['phone'],
+						$thisurl,
+						$_ENV['TEST_EVENT']
+					);
+				}
+
 				$params = '?refNo=' . $response['referenceNo'] . "&platform=" . $m['platform'];
 				$_SESSION['otp-url'] = $url;
 				header("Location: otp.php$params");

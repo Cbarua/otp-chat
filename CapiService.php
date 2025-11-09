@@ -38,6 +38,14 @@ class CapiService
         $this->pixelId = $pixelId;
         $this->accessToken = $accessToken;
 
+        // NEW: Check for essential configuration before initializing the SDK
+        if (empty($this->pixelId) || empty($this->accessToken)) {
+            // Log or throw a warning, but DO NOT call Api::init()
+            $this->apiInitialized = false;
+            error_log('CapiService: Initialization skipped due to missing Pixel ID or Access Token.');
+            return; // Exit constructor early
+        }
+
         // Initialize SDK for server-side calls.
         // App ID and Secret are optional for CAPI calls; access token is required.
         Api::init(null, null, $this->accessToken);
@@ -200,12 +208,25 @@ class CapiService
 
         // Convert to array and return
         $decoded = json_decode($response, true);
-        // Optional: log response for debugging (fbtrace_id etc.)
-        file_put_contents(__DIR__ . '/log/fb_capi_resp.log', 
-            date('c') . " event_id:$eventId" . 
+
+        // Define the log directory path
+        $logDir = __DIR__ . '/log/fb_events/';
+
+        // Ensure the directory exists
+        if (!is_dir($logDir)) {
+            // Recursive: true (create parent dirs if needed), Mode: 0777 (standard permission)
+            mkdir($logDir, 0777, true); 
+        }
+
+        // Generate the daily filename (e.g., fb_events_2025-11-09.log)
+        $logFile = $logDir . 'fb_events_' . date('Y-m-d') . '.log';
+
+        file_put_contents(
+            $logFile, // Use the dynamically created daily file
+            date('c') . " event_id:$eventId" .
             " userdata:" . json_encode($userData->normalize()) .
-            " response:" . $response . 
-            " url: $eventSourceUrl" . PHP_EOL, 
+            " response:" . $response .
+            " url: $eventSourceUrl" . PHP_EOL,
             FILE_APPEND
         );
 

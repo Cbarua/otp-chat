@@ -12,9 +12,18 @@ function getClientIp(): string {
     ];
 
     foreach ($ipHeaders as $header) {
-        $ip = $_SERVER[$header];
-        if (filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $ip;
+        if (!empty($_SERVER[$header])) {
+            // For X-Forwarded-For, take the first IP if there are multiple
+            if ($header === 'HTTP_X_FORWARDED_FOR') {
+                $ips = explode(',', $_SERVER[$header]);
+                $ip = trim($ips[0]);
+            } else {
+                $ip = $_SERVER[$header];
+            }
+
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                return $ip;
+            }
         }
     }
 

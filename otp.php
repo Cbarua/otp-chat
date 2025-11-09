@@ -74,14 +74,16 @@ if (isset($_POST['otp'])) {
 				$_SESSION['reg-id'] = "reg-" . uniqid();
 				$thisurl = getCurrentUrl();
 	
-				$capi->sendEvent(
-					"CompleteRegistration",
-					$_SESSION['reg-id'],
-					$_SESSION['phone'],  // store phone from first step
-					$thisurl,
-					$_ENV['TEST_EVENT'],
-					['currency' => 'USD', 'value' => $value]
-				);
+				if ($capi !== null) {
+					$capi->sendEvent(
+						"CompleteRegistration",
+						$_SESSION['reg-id'],
+						$_SESSION['phone'],  // store phone from first step
+						$thisurl,
+						$_ENV['TEST_EVENT'],
+						['currency' => 'USD', 'value' => $value]
+					);
+				}
 			}
 			
 			header('Location: thanks.php');

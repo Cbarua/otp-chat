@@ -7,13 +7,15 @@ $pg_view_id = "pgview-" . uniqid(); // unique event_id
 $thisurl = getCurrentUrl();
 $testEventCode = $_ENV['TEST_EVENT'] ?? null;
 
-$capi->sendEvent(
-    'PageView',
-    $pg_view_id,
-    null,
-    $thisurl,
-    $testEventCode
-);
+if ($capi !== null) {
+    $capi->sendEvent(
+        "PageView",
+        $pg_view_id,
+        null,
+        $thisurl,
+        $testEventCode
+    );
+}
 
 ?>
 
