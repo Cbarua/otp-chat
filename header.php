@@ -49,7 +49,7 @@ $capi->sendEvent(
         <?php echo fbq_track('PageView', $pg_view_id, $testEventCode); ?>
     </script>
     <noscript><img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=675285198167502&ev=PageView&noscript=1" /></noscript>
+            src="https://www.facebook.com/tr?id=<?php echo $_ENV['PIXEL_ID'] ?>&ev=PageView&noscript=1" /></noscript>
     <!-- End Meta Pixel Code -->
     <title>Welcome</title>
 </head>

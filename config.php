@@ -11,8 +11,8 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $otp_urls = [
-    'ideamart' => $_ENV['IDEAMART'],
-    'mspace' => $_ENV['MSPACE']
+    'ideamart' => json_decode($_ENV['IDEAMART'], true),
+    'mspace' => json_decode($_ENV['MSPACE'], true)
 ];
 
 # Case insesitive constants are deprecated notice

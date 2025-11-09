@@ -18,7 +18,12 @@ $referenceNo = $_GET['refNo'];
 $platform = $_GET['platform'];
 
 #4
-if ((empty($referenceNo) || empty($platform)) || empty($_SESSION['l-id'])) {
+if (empty($referenceNo) || empty($platform)) {
+	header('Location: index.php');
+	exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && empty($_SESSION['l-id'])) {
 	header('Location: index.php');
 	exit;
 }
@@ -36,7 +41,7 @@ if (isset($_POST['otp'])) {
 		$error = $msg['error'];
 	} else {
 		$otp = $otp[0];
-		$response = verifyOtp(url[$platform], $referenceNo, $otp);
+		$response = verifyOtp($_SESSION['otp-url'], $referenceNo, $otp);
 		
 		otplog($response);
 
@@ -49,8 +54,8 @@ if (isset($_POST['otp'])) {
 				$value = 0.02;
 				$phone = $_SESSION['phone'];
 				
-				$regex_hutch = '/^tel:947[2,8]\d{7}/';
-				$regex_mobitel = '/^tel:947[0,1]\d{7}/';
+				$regex_hutch = '/^947[2,8]\d{7}/';
+				$regex_mobitel = '/^947[0,1]\d{7}/';
 				$is_hutch = preg_match($regex_hutch, $phone);
 				$is_mobitel = preg_match($regex_hutch, $phone);
 

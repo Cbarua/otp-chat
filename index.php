@@ -34,7 +34,7 @@ if (isset($_POST['mobile'])) {
 		otplog($mobile);
 		webuserlog($mobile);
 		
-		$url = url[$m['platform']];
+		$urls = url[$m['platform']];
 
 		$user_info = userInfo();
 		$thisurl = getCurrentUrl();
@@ -43,31 +43,36 @@ if (isset($_POST['mobile'])) {
 			'appCode' => $thisurl
 		];
 
-		$response = getOtp($url, $mobile, array_merge($metaData, $user_info));
+		foreach ($urls as $url) {
+			otplog("Trying OTP URL: " . $url);
 
-		otplog($response);
-
-		if (isset($response['referenceNo'])) {
-			$_SESSION['l-id'] = "lead-" . uniqid();
-			// Store fbp and fbc from form post into session for later CAPI calls
-			$_SESSION['fbp'] = $_POST['fbp'] ?? null;
-			$_SESSION['fbc'] = $_POST['fbc'] ?? null;
-			
-			$capi->sendEvent(
-				"Lead",
-				$_SESSION['l-id'],
-				$_SESSION['phone'],
-				$thisurl,
-				$_ENV['TEST_EVENT']
-			);
-						
-			$params = '?refNo=' . $response['referenceNo'] . "&platform=" . $m['platform'];
-			header("Location: otp.php$params");
-			exit();
-		} elseif ($response['statusDetail'] === 'user already registered') {
-			$message = $msg['registered'];
-		} else {
-			$message = $msg['error'];
+			$response = getOtp($url, $mobile, array_merge($metaData, $user_info));
+	
+			otplog($response);
+	
+			if (isset($response['referenceNo'])) {
+				$_SESSION['l-id'] = "lead-" . uniqid();
+				// Store fbp and fbc from form post into session for later CAPI calls
+				$_SESSION['fbp'] = $_POST['fbp'] ?? null;
+				$_SESSION['fbc'] = $_POST['fbc'] ?? null;
+				
+				$capi->sendEvent(
+					"Lead",
+					$_SESSION['l-id'],
+					$_SESSION['phone'],
+					$thisurl,
+					$_ENV['TEST_EVENT']
+				);
+							
+				$params = '?refNo=' . $response['referenceNo'] . "&platform=" . $m['platform'];
+				$_SESSION['otp-url'] = $url;
+				header("Location: otp.php$params");
+				exit();
+			} elseif ($response['statusDetail'] === 'user already registered') {
+				$message = $msg['registered'];
+			} else {
+				$message = $msg['error'];
+			}
 		}
 	}
 }
